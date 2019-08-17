@@ -2,13 +2,14 @@ package zio.nio.file
 
 import java.io.{File, IOError, IOException}
 import java.net.URI
-import java.nio.file.{FileSystem, LinkOption, Paths, Path => JPath}
+import java.nio.file.{FileSystem, LinkOption, Paths, Watchable => JWatchable, Path => JPath}
+
 import scala.collection.JavaConverters._
 import zio.blocking.Blocking
 import zio.{IO, ZIO}
 
 
-final class Path private (private[nio] val javaPath: JPath) {
+final class Path private (private[nio] val javaPath: JPath) extends Watchable {
 
   import Path._
 
@@ -56,6 +57,8 @@ final class Path private (private[nio] val javaPath: JPath) {
   def toFile: File = javaPath.toFile
 
   def elements: List[Path] = javaPath.iterator().asScala.map(fromJava).toList
+
+  override protected def javaWatchable: JWatchable = javaPath
 
   override def hashCode: Int = javaPath.hashCode
 
