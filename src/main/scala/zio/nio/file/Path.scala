@@ -2,11 +2,12 @@ package zio.nio.file
 
 import java.io.{File, IOError, IOException}
 import java.net.URI
-import java.nio.file.{FileSystem, LinkOption, Paths, Watchable => JWatchable, Path => JPath}
+import java.nio.file.{LinkOption, Paths, Path => JPath, Watchable => JWatchable}
+
+import zio.ZIO
+import zio.blocking.Blocking
 
 import scala.collection.JavaConverters._
-import zio.blocking.Blocking
-import zio.{IO, ZIO}
 
 
 final class Path private (private[nio] val javaPath: JPath) extends Watchable {

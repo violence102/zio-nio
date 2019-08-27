@@ -15,7 +15,7 @@ trait Watchable {
   protected def javaWatchable: JWatchable
 
   final def register(watcher: WatchService, events: WatchEvent.Kind[_]*): IO[Exception, WatchKey] =
-    IO.effect(new WatchKey(javaWatchable.register(watcher.javaWatchService))).refineToOrDie[Exception]
+    IO.effect(new WatchKey(javaWatchable.register(watcher.javaWatchService, events: _*))).refineToOrDie[Exception]
 
   final def register(watcher: WatchService, events: Iterable[WatchEvent.Kind[_]], modifiers: WatchEvent.Modifier*): IO[Exception, WatchKey] =
     IO.effect(new WatchKey(javaWatchable.register(watcher.javaWatchService, events.toArray, modifiers:_*)))

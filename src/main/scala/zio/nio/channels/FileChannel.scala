@@ -1,20 +1,23 @@
 package zio.nio.channels
 
 import java.io.IOException
-import java.nio.channels.{ FileChannel => JFileChannel }
+import java.nio.channels.{FileChannel => JFileChannel}
 import java.nio.file.attribute.FileAttribute
-import java.nio.file.{ OpenOption, Path }
+import java.nio.file.OpenOption
 
 import scala.collection.JavaConverters._
-import zio.{ IO, ZIO }
+import zio.{IO, Managed, ZIO}
 import zio.blocking.Blocking
-import zio.nio.{ ByteBuffer, MappedByteBuffer }
+import zio.nio.file.Path
+import zio.nio.{ByteBuffer, MappedByteBuffer}
 
 final class FileChannel private[channels] (override protected[channels] val channel: JFileChannel)
     extends GatheringByteChannel
     with ScatteringByteChannel {
 
   def position: IO[IOException, Long] = IO.effect(channel.position()).refineToOrDie[IOException]
+
+  def postion(newPosition: Long): IO[Exception, Unit] = IO.effect(channel.position(newPosition)).unit.refineToOrDie[Exception]
 
   def size: IO[IOException, Long] = IO.effect(channel.size()).refineToOrDie[IOException]
 
@@ -77,11 +80,13 @@ final class FileChannel private[channels] (override protected[channels] val chan
 
 object FileChannel {
 
-  def open(path: Path, options: Set[_ <: OpenOption], attrs: FileAttribute[_]*): IO[Exception, FileChannel] =
-    IO.effect(new FileChannel(JFileChannel.open(path, options.asJava, attrs: _*))).refineToOrDie[Exception]
+  def open(path: Path, options: Set[_ <: OpenOption], attrs: FileAttribute[_]*): Managed[Exception, FileChannel] =
+    IO.effect(new FileChannel(JFileChannel.open(path.javaPath, options.asJava, attrs: _*))).refineToOrDie[Exception]
+    .toManaged(_.close.orDie)
 
-  def open(path: Path, options: OpenOption*): IO[Exception, FileChannel] =
-    IO.effect(new FileChannel(JFileChannel.open(path, options: _*))).refineToOrDie[Exception]
+  def open(path: Path, options: OpenOption*): Managed[Exception, FileChannel] =
+    IO.effect(new FileChannel(JFileChannel.open(path.javaPath, options: _*))).refineToOrDie[Exception]
+    .toManaged(_.close.orDie)
 
   type MapMode = JFileChannel.MapMode
 

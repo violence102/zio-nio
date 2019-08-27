@@ -1,13 +1,13 @@
 package zio.nio.file
 
-import java.io.IOException
 import java.net.URI
 import java.nio.file.attribute.UserPrincipalLookupService
 import java.nio.{file => jf}
 
-import scala.collection.JavaConverters._
-import zio.{IO, UIO, ZIO}
 import zio.blocking.Blocking
+import zio.{IO, UIO, ZIO}
+
+import scala.collection.JavaConverters._
 
 final class FileSystem private (private val javaFileSystem: jf.FileSystem) {
 

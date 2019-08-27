@@ -8,7 +8,7 @@ trait Channel {
 
   protected val channel: JChannel
 
-  final def close: IO[Exception, Unit] =
+  protected final def close: IO[Exception, Unit] =
     IO.effect(channel.close()).refineToOrDie[Exception]
 
   /**
